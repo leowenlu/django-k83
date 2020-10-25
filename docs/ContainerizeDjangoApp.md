@@ -1,4 +1,4 @@
-#Containerize Django App
+#Create Djanso Docker Image
 ## Build the docker image
 We first need a docker image which has all modules we need, we also need copy our source code to the docker image to make our django app working.
 
@@ -34,5 +34,3 @@ If found ```Unable to find image '${yourHostname}/leo-django:v1' locally``` when
 With `eval $(minikube docker-env)`, you may not able to reach you webApp.
 
 These caused by `eval $(minikube docker-env)`, then solution is you can find the image ID, and run `docker run -itd -p 8000:8000 ${imageID}/leo-django:v1`.
-
-**NOTE:**  mu00157969x is the hostname I used for my lab
