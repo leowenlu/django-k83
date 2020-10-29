@@ -7,11 +7,11 @@ minikube is a local kubernetes, makes it easy to develop in kubernetes. [link ht
 docker desktop is another option [link https://docs.docker.com/desktop/ ]
 
 # Run  App Locally 
-[./docs/RunTheAppLocally.md]
+Very first we will setup the django web app to run on our locally. [here](./docs/RunTheAppLocally.md)
 # Containerize Django App
-[./docs/ContainerizeDjangoApp.md]
+Everything is working as expected in python virtualenv, now let's put it in a contianer. [here](./docs/ContainerizeDjangoApp.md)
 # Deploy Django To Kubernetes
-[./docs/DeployDjangoToKubernetes.md]
+After we have made webApp running in a contianer, we then will deploy it to Kubernetes [here](./docs/DeployDjangoToKubernetes.md)
 # postgres database as docker to Kubernetes
 
 # Containerize Celery, and Redis with Docker.
