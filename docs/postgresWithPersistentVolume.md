@@ -1,6 +1,10 @@
 --- 
+[](
+    key1: value1
+    key2: value2
+)
 Author: Leo Li
-Date: 20-11-2020
+Date: 7-11-2020
 Title: Postgres With Persistent Volume
 Tags:
     - Kubernetes
@@ -87,30 +91,79 @@ NAME                   TYPE     DATA   AGE
 postgres-credentials   Opaque   2      25s
 
 ```
-**NOTE** `user` and `password` in *secrets.yaml* need be encoded with `base64`
+**NOTE** 
+1. `user` and `password` in *secrets.yaml* need be encoded with `base64`
+2. Security concerns, `base64` is not considered as `encryption`. The encoding is entirely well known, the algorithm is simple and as it has not "mutability" of the algorithm or concept of keys etc. it is not considered as "encryption".
+3. Bad idea to push *secrets.yaml* to you repo for security reason.
 
 ## deploy postgres 
 
-``` bash
-x:$ kubectl apply -f deploy/postgres/deployment.yaml 
-deployment.apps/postgres created
+``` bashTerminal
+ kubectl apply -f deploy/postgres/deployment.yaml 
+```
+output should be:
+
+`deployment.apps/postgres created`
 
 
-$ kubectl get deployments
-NAME       READY   UP-TO-DATE   AVAILABLE   AGE
-postgres   1/1     1            1           36s
+## Deploy service 
 
+``` bashTerminal
+kubectl apply -f deploy/postgres/service.yaml 
 ```
 
-## service 
+**Using Secrets as environment varialbes**
+Multiple Pods can reference the same secret.
 
-   ``` bash
-$ kubectl apply -f deploy/postgres/service.yaml 
-#service/postgres-service created
+The container definition int *services.yaml* as bellow:
+
+``` yaml
+  env:
+    - name: POSTGRES_USER
+      valueFrom:
+        secretKeyRef:
+          name: postgres-credentials
+          key: user
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: postgres-credentials
+          key: password
+    - name: POSTGRES_DB
+      value: kubernetes_django
 ```
+Let's take a look at what env in postgres container:
 
+```
+kubectl exec --stdin --tty postgres-db79cc55d-wxg5d -- /bin/bash
 
-
+root@postgres-db79cc55d-wxg5d:/# printenv
+HOSTNAME=postgres-db79cc55d-wxg5d
+KUBERNETES_PORT=tcp://10.96.0.1:443
+KUBERNETES_PORT_443_TCP_PORT=443
+POSTGRES_DB=kubernetes_django
+TERM=xterm
+PG_MAJOR=9.6
+KUBERNETES_SERVICE_PORT=443
+KUBERNETES_SERVICE_HOST=10.96.0.1
+POSTGRES_PASSWORD=replaceWithYourPassword
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/postgresql/9.6/bin
+PWD=/
+LANG=en_US.utf8
+POSTGRES_USER=replaceWithUsername
+SHLVL=1
+HOME=/root
+KUBERNETES_PORT_443_TCP_PROTO=tcp
+KUBERNETES_SERVICE_PORT_HTTPS=443
+PG_VERSION=9.6.6-1.pgdg80+1
+PGDATA=/var/lib/postgresql/data
+GOSU_VERSION=1.10
+KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
+KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
+_=/usr/bin/printenv
+```
+You can see environment variables `POSTGRES_PASSWORD` `POSTGRES_USER` and `POSTGRES_DB` and their values.
+In the API server, secret data is stored in etcd, so be cautious with it, detail please see [Here](https://kubernetes.io/docs/concepts/configuration/secret/#risks)
 ## test
 
 as I am using `minikube` in my lab, so **minikube service django-service** can help me to get the URL and help us to test the service in browser.
@@ -132,4 +185,15 @@ minikube service django-service
 |-----------|----------------|-------------|----------------------------|
 🎉  Opening service default/django-service in default browser...
 
+```
+
+## config django to use postgres database
+
+```mermaid 
+
+graph TD;
+A-->B;
+A-->C;
+B-->D;
+C-->D;
 ```
