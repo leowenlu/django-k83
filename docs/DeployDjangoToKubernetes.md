@@ -1,38 +1,53 @@
-#Containerize Django App
-## Build the docker image
-We first need a docker image which has all modules we need, we also need copy our source code to the docker image to make our django app working.
+## Containerize Django Deploy To Kubernetes.md
 
-Create django Dockerfile:
+1. create **deploy** folder for django deployments/services
+
+    Edit **deploy/django/deployment.yml** with the following content
 ```
-FROM python:3.8-slim
-ENV PROJECT_ROOT /code
-WORKDIR $PROJECT_ROOT
-COPY code/ $PROJECT_ROOT
-RUN pip install django
-CMD ["python", "manage.py","runserver","0.0.0.0:8000"]
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django
+  labels:
+    app: django
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: django
+  template:
+    metadata:
+      labels:
+        pod: django
+    spec:
+      containers:
+        - name: django
+          image: leoli/leo-django
+          ports:
+            - containerPort: 8000
+          command: ["python"]
+          args: ["manage.py","runserver","0.0.0.0:8000"]
 ```
-1. python:3.8-slim is relatively small, happy with this python base image.
-2. the best way to install python modules is with a requirement.text file by doning `RUN pip install -r requirements.txt`
 
-Navigate to your project folder, where is the **Dockerfile**, build the image with following command:
-NOTE: if you have **minikube** install, type in `eval $(minikube docker-env)` in the terminal.
-NOTE: Open **locallibrary/settings.py** find `ALLOWED_HOSTS = []` replace with  `ALLOWED_HOSTS = ['*']`
-```
-# leo-django is the image name in my project, hostname is lowercase
-docker build -t ${HOSTNAME}/leo-django:v1 .
-```
-With the image tag, leave it for now, as we plan to put it in our minikube, rather than docker hub, we will use local repo.
-
-Test if the docker image is working or not with the following command
+2. service yml settings as shown below
 
 ```
-docker run -itd -p 8000:8000 ${HOSTNAME}/leo-django:v1
+kind: Service
+apiVersion: v1
+metadata:
+  name: django-service
+spec:
+  selector:
+    pod: django
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: NodePort
 ```
-
-If found ```Unable to find image '${yourHostname}/leo-django:v1' locally``` when run the about command, then please open another terminal, and try it again. 
-
-With `eval $(minikube docker-env)`, you may not able to reach you webApp.
-
-These caused by `eval $(minikube docker-env)`, then solution is you can find the image ID, and run `docker run -itd -p 8000:8000 ${imageID}/leo-django:v1`.
-
-**NOTE:**  mu00157969x is the hostname I used for my lab
+3. deploy django deployment and service
+```
+kubectl apply -f deploy/django/deployment.yml
+kubectl apply -f deploy/django/service.yml
+```
+minikube service django-service, with URL you can test if everything is working as expected.
