@@ -16,6 +16,19 @@ spec:
     spec:
       containers:
         - name: django
-          image: mu00157969x/leo-django:v1
+          image: mu00157969x/leo-django:v2
           ports:
             - containerPort: 8000
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: password
+            - name: POSTGRES_DB
+              value: kubernetes_django

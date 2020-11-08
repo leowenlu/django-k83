@@ -1,9 +1,4 @@
---- 
-[](
-    key1: value1
-    key2: value2
-)
-Author: Leo Li
+---
 Date: 7-11-2020
 Title: Postgres With Persistent Volume
 Tags:
@@ -11,6 +6,7 @@ Tags:
     - postgres
 ---
 
+[](key1: value1key2: value2)
 Kubenetes PV and PVC document is [here](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
 
 ## Providion PV
@@ -28,7 +24,8 @@ Let's check if everything is working so far for volume and volume-claim.
 
 
 ```bash
-#$ kubectl describe pvc postgres-pvc
+kubectl describe pvc postgres-pvc
+
 Name:          postgres-pvc
 Namespace:     default
 StorageClass:  standard
@@ -36,7 +33,9 @@ Status:        Bound
 Volume:        postgres-pv
 Labels:        type=local
 Annotations:   kubectl.kubernetes.io/last-applied-configuration:
-                 {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"labels":{"type":"local"},"name":"postgres-pvc","namespace"...
+                 {"apiVersion":"v1","kind":"PersistentVolumeClaim",
+                 "metadata":{"annotations":{},"labels":{"type":"local"},
+                 "name":"postgres-pvc","namespace"...
                pv.kubernetes.io/bind-completed: yes
 Finalizers:    [kubernetes.io/pvc-protection]
 Capacity:      2Gi
@@ -54,7 +53,9 @@ Status:        Bound
 Volume:        postgres-pv
 Labels:        type=local
 Annotations:   kubectl.kubernetes.io/last-applied-configuration:
-                 {"apiVersion":"v1","kind":"PersistentVolumeClaim","metadata":{"annotations":{},"labels":{"type":"local"},"name":"postgres-pvc","namespace"...
+                 {"apiVersion":"v1","kind":"PersistentVolumeClaim",
+                 "metadata":{"annotations":{},"labels":{"type":"local"},
+                 "name":"postgres-pvc","namespace"...
                pv.kubernetes.io/bind-completed: yes
 Finalizers:    [kubernetes.io/pvc-protection]
 Capacity:      2Gi
@@ -134,7 +135,7 @@ The container definition int *services.yaml* as bellow:
 ```
 Let's take a look at what env in postgres container:
 
-```
+```ini
 kubectl exec --stdin --tty postgres-db79cc55d-wxg5d -- /bin/bash
 
 root@postgres-db79cc55d-wxg5d:/# printenv
@@ -188,6 +189,83 @@ minikube service django-service
 ```
 
 ## config django to use postgres database
+
+1. Add env to djano container difinition to include postgres username password and the databse name, it will be like the postgres container definition for the env.
+
+kubectl apply -f deploy/django/deployment.yml 
+deployment.apps/django configured
+
+
+printenv in the pod:(partial)
+```ini
+DJANGO_SERVICE_PORT_8000_TCP_PROTO=tcp
+POSTGRES_SERVICE_SERVICE_HOST=10.96.128.196
+DJANGO_SERVICE_PORT_8000_TCP_PORT=8000
+POSTGRES_SERVICE_PORT_5432_TCP_ADDR=10.96.128.196
+POSTGRES_SERVICE_SERVICE_PORT=5432
+DJANGO_SERVICE_SERVICE_PORT=8000
+POSTGRES_SERVICE_PORT_5432_TCP_PROTO=tcp
+DJANGO_SERVICE_PORT=tcp://10.106.176.104:8000
+DJANGO_SERVICE_PORT_8000_TCP=tcp://10.106.176.104:8000
+DJANGO_SERVICE_PORT_8000_TCP_ADDR=10.106.176.104
+POSTGRES_PASSWORD=replaceWithYourPassword
+POSTGRES_USER=replaceWithUsername
+POSTGRES_DB=kubernetes_django
+POSTGRES_SERVICE_PORT_5432_TCP_PORT=5432
+DJANGO_SERVICE_SERVICE_HOST=10.106.176.104
+KUBERNETES_PORT_443_TCP_PROTO=tcp
+KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
+KUBERNETES_SERVICE_HOST=10.96.0.1
+KUBERNETES_PORT=tcp://10.96.0.1:443
+KUBERNETES_PORT_443_TCP_PORT=443
+PROJECT_ROOT=/code
+```
+
+2. Modify setting.py in the code to connect to postdatabase
+change DATABASES from 
+
+``` json
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+```
+
+to
+
+```
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'kubernetes_django',
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': os.getenv('POSTGRES_PORT', 5432)
+    }
+}
+```
+then create code/requiemetns.txt with the follow as content
+
+```
+Django
+psycopg2-binary
+```
+modify *Dockerfile* as following:
+
+```
+FROM python:3.8-slim
+ENV PROJECT_ROOT /code
+WORKDIR $PROJECT_ROOT
+COPY code/ $PROJECT_ROOT
+RUN pip install -r requirements.txt
+CMD ["python", "manage.py","runserver","0.0.0.0:8000"]
+```
+build the docker image again
+
+` docker build -t mu00157969x/leo-django:v2 .`
 
 ```mermaid 
 
