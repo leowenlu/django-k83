@@ -1,31 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: django
+  name: celery-beat
   labels:
-    app: django
+    app: celery-beat
 spec:
   replicas: 1
   selector:
     matchLabels:
-      pod: django
+      pod: celery-beat
   template:
     metadata:
       labels:
-        pod: django
+        pod: celery-beat
     spec:
       containers:
-        - name: django
+        - name: celery-beat
           image: mu00157969x/leo-django:v2
-          command: ["python", "manage.py","runserver","0.0.0.0:8000"]
-          ports:
-            - containerPort: 8000
+          command: ['celery', '-A', 'core', 'beat', '-l', 'debug']
           env:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
                   name: postgres-credentials
                   key: user
+
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:

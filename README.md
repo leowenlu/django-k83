@@ -14,4 +14,12 @@ Everything is working as expected in python virtualenv, now let's put it in a co
 After we have made webApp running in a contianer, we then will deploy it to Kubernetes.[Here](./docs/DeployDjangoToKubernetes.md)
 # postgres database as docker to Kubernetes
 Postgres database will run in a container, as the Docker containers useare ephemeral in nature so persistent storage volume needed. Details [Here](./docs/postgresWithPersistentVolume.md)  
-# Containerize Celery, and Redis with Docker.
+# Deploy Celery and Redis 
+## What is Celery and Redis 
+Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker. [Here](https://redis.io/)
+
+Celery is a simple, flexible, and reliable distributed system to process vast amounts of messages, while providing operations with the tools required to maintain such a system. [Here](https://docs.celeryproject.org/en/latest/index.html)
+
+## K8s deploy
+[Here](./docs/deployCeleryAndRedis.md)
+

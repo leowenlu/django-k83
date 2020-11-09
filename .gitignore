@@ -1,3 +1,6 @@
 code/db.sqlite3
-**/*.pyc
-**/__pycache__
+*.pyo
+*.log
+*.git
+*.vscode/
+db.sqlite3
