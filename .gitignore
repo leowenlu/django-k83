@@ -1,3 +1,4 @@
+__pycache__/
 code/db.sqlite3
 *.pyo
 *.log
