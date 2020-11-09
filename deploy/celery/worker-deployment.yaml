@@ -1,25 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: django
+  name: celery-worker
   labels:
-    app: django
+    deployment: celery-worker
 spec:
   replicas: 1
   selector:
     matchLabels:
-      pod: django
+      pod: celery-worker
   template:
     metadata:
       labels:
-        pod: django
+        pod: celery-worker
     spec:
       containers:
-        - name: django
+        - name: celery-worker
           image: mu00157969x/leo-django:v2
-          command: ["python", "manage.py","runserver","0.0.0.0:8000"]
-          ports:
-            - containerPort: 8000
+          command: ['celery', '-A', 'core', 'worker', '-l', 'info']
           env:
             - name: POSTGRES_USER
               valueFrom:

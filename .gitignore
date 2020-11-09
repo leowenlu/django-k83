@@ -1,3 +1,14 @@
+__pycache__/
 code/db.sqlite3
-**/*.pyc
-**/__pycache__
+*.py[cod]
+*.log
+*.git
+*.vscode/
+db.sqlite3
+*.pot
+# Unit test / coverage reports
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml

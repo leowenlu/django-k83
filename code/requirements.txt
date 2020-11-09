@@ -1,0 +1,8 @@
+celery==4.4 #flower doesn't support celery5
+Django
+vine<5.0.0
+psycopg2-binary
+django-health-check
+django-redis
+kombu==4.6.11
+redis
