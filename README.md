@@ -7,11 +7,17 @@ minikube is a local kubernetes, makes it easy to develop in kubernetes. [link ht
 docker desktop is another option [link https://docs.docker.com/desktop/ ]
 
 # Run  App Locally 
+
 Very first we will setup the django web app to run on our locally. [Here](./docs/RunTheAppLocally.md)
 # Containerize Django App
 Everything is working as expected in python virtualenv, now let's put it in a contianer.[Here](./docs/ContainerizeDjangoApp.md)
 # Deploy Django To Kubernetes
 After we have made webApp running in a contianer, we then will deploy it to Kubernetes.[Here](./docs/DeployDjangoToKubernetes.md)
+Very first we will setup the django web app to run on our locally. [here](./docs/RunTheAppLocally.md)
+# Containerize Django App
+Everything is working as expected in python virtualenv, now let's put it in a contianer. [here](./docs/ContainerizeDjangoApp.md)
+# Deploy Django To Kubernetes
+After we have made webApp running in a contianer, we then will deploy it to Kubernetes [here](./docs/DeployDjangoToKubernetes.md)
 # postgres database as docker to Kubernetes
 Postgres database will run in a container, as the Docker containers useare ephemeral in nature so persistent storage volume needed. Details [Here](./docs/postgresWithPersistentVolume.md)  
 # Deploy Celery and Redis 
@@ -22,4 +28,6 @@ Celery is a simple, flexible, and reliable distributed system to process vast am
 
 ## K8s deploy
 [Here](./docs/deployCeleryAndRedis.md)
+
+# Migrate the project to PRODUCTION kubernetes Cluster
 
